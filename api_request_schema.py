@@ -1,104 +1,72 @@
+# refer to https://docs.aws.amazon.com/bedrock/latest/userguide/models-supported.html
+
 api_request_list = {
-    'amazon.titan-text-express-v1': {
-        "modelId": "amazon.titan-text-express-v1",
+    'us.amazon.nova-pro-v1:0': {
+        "modelId": "us.amazon.nova-pro-v1:0",
         "contentType": "application/json",
-        "accept": "*/*",
+        "accept": "application/json",
         "body": {
-            "inputText": "",
-            "textGenerationConfig": {
-                "maxTokenCount": 4096,
-                "stopSequences": [],
+            "schemaVersion": "messages-v1",
+            "messages": [
+                {
+                    "role": "user",
+                    "content": [{"text": ""}]
+                }
+            ],
+            "inferenceConfig": {
+                "maxTokens": 4096,
                 "temperature": 0,
-                "topP": 1
+                "topP": 1,
+                "topK": 100
             }
         }
     },
-    'amazon.titan-text-lite-v1': {
-        "modelId": "amazon.titan-text-lite-v1",
+    'us.anthropic.claude-3-5-sonnet-20241022-v2:0': {
+        "modelId": "us.anthropic.claude-3-5-sonnet-20241022-v2:0",
         "contentType": "application/json",
-        "accept": "*/*",
+        "accept": "application/json",
         "body": {
-            "inputText": "",
-            "textGenerationConfig": {
-                "maxTokenCount": 4096,
-                "stopSequences": [],
-                "temperature": 0,
-                "topP": 1
-            }
-        }
-    },
-    'anthropic.claude-v2:1': {
-        "modelId": "anthropic.claude-v2:1",
-        "contentType": "application/json",
-        "accept": "*/*",
-        "body": {
-            "prompt": "",
-            "max_tokens_to_sample": 300,
-            "temperature": 0.5,
-            "top_k": 250,
-            "top_p": 1,
-            "stop_sequences": [
-                "\n\nHuman:"
+            "messages": [
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": ""
+                        }
+                    ]
+                }
             ],
-            "anthropic_version": "bedrock-2023-05-31"
-        }
-    },
-    'anthropic.claude-v2': {
-        "modelId": "anthropic.claude-v2",
-        "contentType": "application/json",
-        "accept": "*/*",
-        "body": {
-            "prompt": "",
-            "max_tokens_to_sample": 300,
+            "anthropic_version": "bedrock-2023-05-31",
+            "max_tokens": 300,
             "temperature": 0.5,
-            "top_k": 250,
             "top_p": 1,
-            "stop_sequences": [
-                "\n\nHuman:"
+            "top_k": 250,
+            "stop_sequences": ["\n\nHuman:"]
+        }
+    },
+    'us.anthropic.claude-3-5-haiku-20241022-v1:0': {
+        "modelId": "us.anthropic.claude-3-5-haiku-20241022-v1:0",
+        "contentType": "application/json",
+        "accept": "application/json",
+        "body": {
+            "messages": [
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": ""
+                        }
+                    ]
+                }
             ],
-            "anthropic_version": "bedrock-2023-05-31"
-        }
-    },
-    'meta.llama2-13b-chat-v1': {
-        "modelId": "meta.llama2-13b-chat-v1",
-        "contentType": "application/json",
-        "accept": "*/*",
-        "body": {
-            "prompt": "",
-            "max_gen_len": 512,
-            "temperature": 0.2,
-            "top_p": 0.9
-        }
-    },
-    'meta.llama2-70b-chat-v1': {
-        "modelId": "meta.llama2-70b-chat-v1",
-        "contentType": "application/json",
-        "accept": "*/*",
-        "body": {
-            "prompt": "",
-            "max_gen_len": 512,
-            "temperature": 0.2,
-            "top_p": 0.9
-        }
-    },
-    'cohere.command-text-v14': {
-        "modelId": "cohere.command-text-v14",
-        "contentType": "application/json",
-        "accept": "*/*",
-        "body": {
-            "prompt": "",
-            "max_tokens": 1024,
-            "temperature": 0.8,
-        }
-    },
-    'cohere.command-light-text-v14': {
-        "modelId": "cohere.command-light-text-v14",
-        "contentType": "application/json",
-        "accept": "*/*",
-        "body": {
-            "prompt": "",
-            "max_tokens": 1024,
-            "temperature": 0.8,
+            "anthropic_version": "bedrock-2023-05-31",
+            "max_tokens": 300,
+            "temperature": 0.5,
+            "top_p": 1,
+            "top_k": 250,
+            "stop_sequences": ["\n\nHuman:"]
         }
     },
 }

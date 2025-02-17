@@ -15,7 +15,7 @@ from amazon_transcribe.model import TranscriptEvent, TranscriptResultStream
 
 from api_request_schema import api_request_list, model_ids
 
-model_id = os.getenv('MODEL_ID', 'anthropic.claude-v2:1')
+model_id = os.getenv('MODEL_ID', 'us.anthropic.claude-3-5-haiku-20241022-v1:0')
 aws_region = os.getenv('AWS_REGION', 'us-east-1')
 
 if model_id not in model_ids:
@@ -54,7 +54,7 @@ transcribe_streaming = TranscribeStreamingClient(region=config['region'])
 
 
 class UserInputManager:
-    """Manages user input and executor shutdown functionality"""
+    """사용자 입력과 실행기 종료 기능을 관리합니다"""
     shutdown_executor = False
     executor = None
 
@@ -84,21 +84,22 @@ class UserInputManager:
 
 
 def define_bedrock_body(text):
+    """Bedrock API 요청 본문을 생성합니다"""
     model_id = config['bedrock']['api_request']['modelId']
-    model_provider = model_id.split('.')[0]
+    model_provider = model_id.split('.')[1]
     body = config['bedrock']['api_request']['body']
 
     if model_provider == 'amazon':
-        body['inputText'] = text
-    elif model_provider == 'meta':
-        body['prompt'] = text
+        body['messages'][0]['content'][0]['text'] = text
     elif model_provider == 'anthropic':
-        body['prompt'] = f'\n\nHuman: {text}\n\nAssistant:'
-    elif model_provider == 'cohere':
-        body['prompt'] = text
+        body['messages'][0]['content'] = [
+            {
+                "type": "text",
+                "text": text
+            }
+        ]
     else:
         raise Exception('Unknown model provider.')
-
     return body
 
 def get_stream_chunk(event):
@@ -106,22 +107,19 @@ def get_stream_chunk(event):
 
 def get_stream_text(chunk):
     model_id = config['bedrock']['api_request']['modelId']
-    model_provider = model_id.split('.')[0]
+    model_provider = model_id.split('.')[1]
 
     chunk_obj = ''
     text = ''
     if model_provider == 'amazon':
         chunk_obj = json.loads(chunk.get('bytes').decode())
-        text = chunk_obj['outputText']
-    elif model_provider == 'meta':
-        chunk_obj = json.loads(chunk.get('bytes').decode())
-        text = chunk_obj['generation']
+        content_block_delta = chunk_obj.get('contentBlockDelta')
+        if content_block_delta:
+            text = content_block_delta.get('delta').get('text', '')
     elif model_provider == 'anthropic':
         chunk_obj = json.loads(chunk.get('bytes').decode())
-        text = chunk_obj['completion']
-    elif model_provider == 'cohere':
-        chunk_obj = json.loads(chunk.get('bytes').decode())
-        text = ' '.join([c["text"] for c in chunk_obj['generations']])
+        if chunk_obj.get('type') == 'content_block_delta':
+            text = chunk_obj['delta'].get('text', '')
     else:
         raise NotImplementedError('Unknown model provider.')
 
@@ -130,8 +128,8 @@ def get_stream_text(chunk):
 
 def to_audio_generator(bedrock_stream):
     """
-    Converts Bedrock's streaming response to audio chunks
-    Implements real-time streaming by splitting responses at sentence boundaries
+    Bedrock의 스트리밍 응답을 오디오 청크로 변환합니다
+    문장 경계에서 응답을 분할하여 실시간 스트리밍을 구현합니다
     """
     prefix = ''
 
@@ -159,7 +157,7 @@ def to_audio_generator(bedrock_stream):
 
 
 class BedrockWrapper:
-    """Handles streaming interaction with Amazon Bedrock"""
+    """Amazon Bedrock과의 스트리밍 상호작용을 처리합니다"""
     def __init__(self):
         self.speaking = False
 
@@ -168,8 +166,8 @@ class BedrockWrapper:
 
     def invoke_bedrock(self, text):
         """
-        Invokes Bedrock model with streaming response handling
-        Converts response stream to audio in real-time
+        Amazon Bedrock LLM 모델을 호출하여 응답을 생성하고 스트리밍합니다
+        실시간으로 응답을 오디오로 변환합니다
         """
         logger.debug('Bedrock generation started')
         self.speaking = True
@@ -178,7 +176,7 @@ class BedrockWrapper:
             body = define_bedrock_body(text)
             body_json = json.dumps(body)
             
-            # Initialize streaming response from Bedrock
+            # Bedrock 모델 호출 및 스트리밍 응답 초기화
             response = bedrock_runtime.invoke_model_with_response_stream(
                 body=body_json,
                 modelId=config['bedrock']['api_request']['modelId'],
@@ -207,15 +205,15 @@ class BedrockWrapper:
 
 
 class Reader:
-    """Handles audio streaming output using PyAudio"""
+    """PyAudio를 사용하여 오디오 스트리밍 출력을 처리합니다"""
     def __init__(self):
         self.audio = p.open(format=pyaudio.paInt16, channels=1, rate=16000, output=True)
         self.chunk = 1024
 
     def read(self, data):
         """
-        Streams audio data in chunks for real-time playback
-        Implements interrupt handling for smooth streaming
+        실시간 재생을 위해 청크 단위로 오디오 데이터를 스트리밍합니다
+        원활한 스트리밍을 위한 중단 처리를 구현합니다
         """
         response = polly.synthesize_speech(
             Text=data,
@@ -243,11 +241,15 @@ class Reader:
 
 
 def aws_polly_tts(polly_text):
+    """
+    Amazon Polly를 사용하여 텍스트를 음성으로 변환합니다
+    실시간 응답을 위해 문장 단위로 처리합니다
+    """
     logger.debug(f'Character count: {len(polly_text)}')
     chunk_size = 1024
     sentences = polly_text.split('. ')
     
-    # Process 20 sentences at a time to maintain real-time response
+    # 실시간 응답을 위해 20문장씩 처리
     for i in range(0, len(sentences), 20):
         current_chunk = '. '.join(sentences[i:i + 20])
         logger.debug(f'Processing sentences {i} to {i + 20}')
@@ -255,6 +257,7 @@ def aws_polly_tts(polly_text):
         if not current_chunk.strip():
             continue
             
+        # Polly TTS 호출
         response = polly.synthesize_speech(
             Text=current_chunk,
             Engine=config['polly']['Engine'],
@@ -285,7 +288,8 @@ class EventHandler(TranscriptResultStreamHandler):
         self.bedrock_wrapper = bedrock_wrapper
         self.text = []
         self.sample_count = 0
-        self.max_sample_counter = 12
+        self.max_sample_counter = 120  # Wait for 2 seconds
+        self.silence_threshold = 10    # Quick processing after speech ends
 
     async def handle_transcript_event(self, transcript_event: TranscriptEvent):
         results = transcript_event.transcript.results
@@ -299,7 +303,8 @@ class EventHandler(TranscriptResultStreamHandler):
                             self.text.append(alt.transcript)
             else:
                 self.sample_count += 1
-                if self.sample_count == self.max_sample_counter:
+                if (len(self.text) > 0 and self.sample_count >= self.silence_threshold) or \
+                   (len(self.text) == 0 and self.sample_count >= self.max_sample_counter):
                     if len(self.text) == 0:
                         last_speech = config['last_speech']
                         print(last_speech, flush=True)
@@ -322,7 +327,6 @@ class EventHandler(TranscriptResultStreamHandler):
 
 
 class MicStream:
-
     async def mic_stream(self):
         loop = asyncio.get_event_loop()
         input_queue = asyncio.Queue()
@@ -344,6 +348,9 @@ class MicStream:
         await stream.input_stream.end_stream()
 
     async def basic_transcribe(self):
+        """
+        Amazon Transcribe를 사용하여 실시간 음성-텍스트 변환을 수행합니다
+        """
         loop.run_in_executor(ThreadPoolExecutor(max_workers=1), UserInputManager.start_user_input_loop)
 
         stream = await transcribe_streaming.start_stream_transcription(
