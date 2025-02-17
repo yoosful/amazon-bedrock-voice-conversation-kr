@@ -104,5 +104,4 @@ api_request_list = {
 }
 
 
-def get_model_ids():
-    return list(api_request_list.keys())
+model_ids = list(api_request_list.keys())
