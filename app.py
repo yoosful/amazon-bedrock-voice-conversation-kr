@@ -14,7 +14,7 @@ from amazon_transcribe.model import TranscriptEvent, TranscriptResultStream
 
 from api_request_schema import api_request_list, get_model_ids
 
-model_id = os.getenv('MODEL_ID', 'amazon.titan-text-express-v1')
+model_id = os.getenv('MODEL_ID', 'anthropic.claude-v2:1')
 aws_region = os.getenv('AWS_REGION', 'us-east-1')
 
 if model_id not in get_model_ids():
@@ -24,17 +24,13 @@ if model_id not in get_model_ids():
 api_request = api_request_list[model_id]
 config = {
     'log_level': 'none',  # One of: info, debug, none
-    'last_speech': "If you have any other questions, please don't hesitate to ask. Have a great day!",
+    'last_speech': "다른 질문이 있으시다면 언제든 말씀해주세요. 좋은 하루 되세요!",
     'region': aws_region,
     'polly': {
         'Engine': 'neural',
-        'LanguageCode': 'en-US',
-        'VoiceId': 'Joanna',
+        'LanguageCode': 'ko-KR',
+        'VoiceId': 'Seoyeon',
         'OutputFormat': 'pcm',
-    },
-    'translate': {
-        'SourceLanguageCode': 'en',
-        'TargetLanguageCode': 'en',
     },
     'bedrock': {
         'response_streaming': True,
@@ -386,7 +382,7 @@ class MicStream:
         loop.run_in_executor(ThreadPoolExecutor(max_workers=1), UserInputManager.start_user_input_loop)
 
         stream = await transcribe_streaming.start_stream_transcription(
-            language_code="en-US",
+            language_code="ko-KR",
             media_sample_rate_hz=16000,
             media_encoding="pcm",
         )
@@ -397,16 +393,16 @@ class MicStream:
 
 info_text = f'''
 *************************************************************
-[INFO] Supported FM models: {get_model_ids()}.
-[INFO] Change FM model by setting <MODEL_ID> environment variable. Example: export MODEL_ID=meta.llama2-70b-chat-v1
+[정보] 지원되는 FM 모델: {get_model_ids()}.
+[정보] FM 모델 변경은 <MODEL_ID> 환경변수로 설정하세요. 예시: export MODEL_ID=meta.llama2-70b-chat-v1
 
-[INFO] AWS Region: {config['region']}
-[INFO] Amazon Bedrock model: {config['bedrock']['api_request']['modelId']}
-[INFO] Polly config: engine {config['polly']['Engine']}, voice {config['polly']['VoiceId']}
-[INFO] Log level: {config['log_level']}
+[정보] AWS 리전: {config['region']}
+[정보] Amazon Bedrock 모델: {config['bedrock']['api_request']['modelId']}
+[정보] Polly 설정: 엔진 {config['polly']['Engine']}, 음성 {config['polly']['VoiceId']}
+[정보] 로그 레벨: {config['log_level']}
 
-[INFO] Hit ENTER to interrupt Amazon Bedrock. After you can continue speaking!
-[INFO] Go ahead with the voice chat with Amazon Bedrock!
+[정보] Amazon Bedrock을 중단하려면 Enter 키를 누르세요. 그 후 계속 대화할 수 있습니다!
+[정보] Amazon Bedrock과 음성 대화를 시작하세요!
 *************************************************************
 '''
 print(info_text)
