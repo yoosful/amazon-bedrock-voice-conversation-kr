@@ -365,16 +365,16 @@ class MicStream:
 
 info_text = f'''
 *************************************************************
-[정보] 지원되는 FM 모델: {model_ids}.
-[정보] FM 모델 변경은 <MODEL_ID> 환경변수로 설정하세요. 예시: export MODEL_ID=meta.llama2-70b-chat-v1
+[INFO] 지원되는 FM 모델: {model_ids}.
+[INFO] FM 모델 변경은 <MODEL_ID> 환경변수로 설정하세요. 예시: export MODEL_ID=us.anthropic.claude-3-5-sonnet-20241022-v2:0
 
-[정보] AWS 리전: {config['region']}
-[정보] Amazon Bedrock 모델: {config['bedrock']['api_request']['modelId']}
-[정보] Polly 설정: 엔진 {config['polly']['Engine']}, 음성 {config['polly']['VoiceId']}
-[정보] 로그 레벨: {config['log_level']}
+[INFO] AWS 리전: {config['region']}
+[INFO] Amazon Bedrock 모델: {config['bedrock']['api_request']['modelId']}
+[INFO] Polly 설정: 엔진 {config['polly']['Engine']}, 음성 {config['polly']['VoiceId']}
+[INFO] 로그 레벨: {config['log_level']}
 
-[정보] Amazon Bedrock을 중단하려면 Enter 키를 누르세요. 그 후 계속 대화할 수 있습니다!
-[정보] Amazon Bedrock과 음성 대화를 시작하세요!
+[INFO] Amazon Bedrock을 중단하려면 Enter 키를 누르세요. 그 후 계속 대화할 수 있습니다!
+[INFO] Amazon Bedrock과 음성 대화를 시작하세요!
 *************************************************************
 '''
 print(info_text)

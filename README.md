@@ -66,17 +66,17 @@ python ./app.py
 When you run the app, it will log your current configurations. Below is a sample log of a configuration.
 
 ```text
-*************************************************************
-[INFO] Supported FM models: ['amazon.titan-text-express-v1', 'amazon.titan-text-lite-v1', 'anthropic.claude-v2:1', 'anthropic.claude-v2', 'meta.llama2-13b-chat-v1', 'meta.llama2-70b-chat-v1', 'cohere.command-text-v14', 'cohere.command-light-text-v14'].
-[INFO] Change FM model by setting <MODEL_ID> environment variable. Example: export MODEL_ID=meta.llama2-70b-chat-v1
+***********************************************************************************
+[INFO] 지원되는 FM 모델: ['us.amazon.nova-pro-v1:0', 'us.anthropic.claude-3-5-sonnet-20241022-v2:0', 'us.anthropic.claude-3-5-haiku-20241022-v1:0'].
+[INFO] FM 모델 변경은 <MODEL_ID> 환경변수로 설정하세요. 예시: export MODEL_ID=meta.llama2-70b-chat-v1
 
-[INFO] AWS Region: us-east-1
-[INFO] Amazon Bedrock model: amazon.titan-text-express-v1
-[INFO] Polly config: engine neural, voice Joanna
-[INFO] Log level: none
+[INFO] AWS 리전: us-east-1
+[INFO] Amazon Bedrock 모델: us.anthropic.claude-3-5-sonnet-20241022-v2:0
+[INFO] Polly 설정: 엔진 neural, 음성 Seoyeon
+[INFO] 로그 레벨: none
 
-[INFO] Hit ENTER to interrupt Amazon Bedrock. After you can continue speaking!
-[INFO] Go ahead with the voice chat with Amazon Bedrock!
+[INFO] Amazon Bedrock을 중단하려면 Enter 키를 누르세요. 그 후 계속 대화할 수 있습니다!
+[INFO] Amazon Bedrock과 음성 대화를 시작하세요!
 *************************************************************
 ```
 
